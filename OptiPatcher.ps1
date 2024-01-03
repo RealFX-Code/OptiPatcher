@@ -2,16 +2,31 @@
 function main(){
     # Let user bail if wrong version is detected
 
-    if (((Get-ChildItem OptiFine*_MOD.jar) | Measure-Object).Count -ne 1) {
-        # TODO: eventually write a fix for this.
-        Write-Host "TODO: handle this"
+    $OptifineJarCount = ((Get-ChildItem OptiFine*_MOD.jar) | Measure-Object).Count
+
+    if ($OptifineJarCount -gt 1) { # greater than 1
+        $OptifineJarList = (Get-ChildItem OptiFine*_MOD.jar).Name
+        Write-Host "Multiple OptiFine JARs found. Please select one from the list below."
+        for ($i = 0; $i -lt $OptifineJarList.Length; $i++)
+        {
+            Write-Host $i ")" $OptifineJarList[$i]
+        }
+        $OptifineJar = $OptifineJarList[(Read-Host -Prompt "Select a Jar (0,1,2,etc.) ")]
+        if ([string]::IsNullOrEmpty($OptifineJar)) {
+            Write-Host "--Invalid response to prompt."
+            Start-Sleep -Seconds 3
+            return
+        }
+    } elseif ($OptifineJarCount -eq 0) { # is zero
+        Write-Host "-- No OptiFine JARs found in the current working directory."
+        Write-Host "   Make sure you've extracted the mod from the OptiFine installer and put it in the same folder as this script."
+        Start-Sleep -Seconds 3
         return
+    } elseif ($OptifineJarCount -eq 1) {
+        $OptifineJar = Split-Path (Get-ChildItem OptiFine*_MOD.jar) -leaf
     }
 
-    $OptifineJar = Split-Path (Get-ChildItem OptiFine*_MOD.jar) -leaf
-
-    Write-Host "Patch this version of OptiFine?"
-    Write-Host $OptifineJar
+    Write-Host -NoNewline "Patch this version of OptiFine:" $OptifineJar"? "
     $YN = Read-Host -Prompt "(Y/N)"
     $YN=$YN.ToLower()
     
@@ -19,6 +34,7 @@ function main(){
         Write-Host "-- OK, Continuing."
     } elseif ($YN -eq "n") {
         Write-Host "-- OK, Exiting."
+        Start-Sleep -Seconds 3
         return
     } else {
         Write-Host "-- Answer not understood, Try again."
