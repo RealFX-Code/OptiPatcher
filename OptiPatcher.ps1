@@ -49,7 +49,8 @@ function main(){
     Move-Item -Path "notch\*" -Destination "."
     Set-Location -Path ".."
 
-    Compress-Archive -Path "work\*" -DestinationPath $OptifineJar.Replace("_MOD.jar", "_MOD_PATCHED.jar")
+    Compress-Archive -Path "work\*" -DestinationPath $OptifineJar".zip"
+    Move-Item -Path $OptifineJar".zip" -Destination $OptifineJar.Replace("_MOD.jar", "_MOD_PATCHED.jar")
     Remove-Item -Path "work" -Recurse
     Remove-Item -Path "work.zip"
 
