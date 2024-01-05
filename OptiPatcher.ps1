@@ -26,6 +26,13 @@ function main(){
         $OptifineJar = Split-Path (Get-ChildItem OptiFine*_MOD.jar) -leaf
     }
 
+    if ([System.IO.File]::Exists($OptifineJar.Replace("_MOD.jar", "_MOD_PATCHED.jar"))) {
+        Write-Host "!! "$OptifineJar.Replace("_MOD.jar", "_MOD_PATCHED.jar")" exists!"
+        Write-Host "Please remove it before continuing."
+        Start-Sleep -Seconds 5
+        return
+    }
+
     Write-Host -NoNewline "Patch this version of OptiFine:" $OptifineJar"? "
     $YN = Read-Host -Prompt "(Y/N)"
     $YN=$YN.ToLower()
@@ -45,17 +52,25 @@ function main(){
     Copy-Item -Path $OptifineJar -Destination "work.zip"
     Expand-Archive -Path "work.zip" -DestinationPath "work"
 
-    Set-Location -Path "work"
-    Move-Item -Path "notch\*" -Destination "."
-    Set-Location -Path ".."
+    Copy-Item -Path "work\notch\*" -Destination "work" -Recurse -Force
 
-    Compress-Archive -Path "work\*" -DestinationPath $OptifineJar".zip"
-    Move-Item -Path $OptifineJar".zip" -Destination $OptifineJar.Replace("_MOD.jar", "_MOD_PATCHED.jar")
+    Compress-Archive -Path "work\*" -DestinationPath $OptifineJar.Replace("_MOD.jar", "_MOD_PATCHED.jar")
     Remove-Item -Path "work" -Recurse
     Remove-Item -Path "work.zip"
 
     Write-Host "-- Hopefully Done."
 
+	pause
+
+}
+
+# Version check
+
+if ($PSVersionTable.PSVersion.Major -lt "7") {
+    Write-Host "This script doesn't run on the built in powershell version in windows."
+    Write-Host "Please download the latest version of PowerShell from: https://aka.ms/powershell-release?tag=stable"
+    pause
+    return
 }
 
 main
